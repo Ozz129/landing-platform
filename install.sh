@@ -1,3 +1,4 @@
+cat > install.sh <<'EOF'
 #!/bin/bash
 
 set -e
@@ -21,31 +22,21 @@ fi
 rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR"
 
-echo "Downloading platform files..."
 curl -fsSL "$ZIP_URL" -o /tmp/landing-platform.zip
-
 rm -rf "/tmp/$REPO_NAME-main"
 unzip -q /tmp/landing-platform.zip -d /tmp
-
 cp -R "/tmp/$REPO_NAME-main/." "$APP_DIR"
 
-echo "Pulling Docker image..."
 docker pull "$IMAGE"
 
 mkdir -p "$BIN_DIR"
 
-cat > "$BIN_DIR/landing-platform" <<'EOF2'
+cat > "$BIN_DIR/landing-platform" <<EOF2
 #!/bin/bash
-
-APP_DIR="$HOME/.landing-platform"
-IMAGE="ghcr.io/ozz129/landing-platform:latest"
-
 cd "$APP_DIR"
 
 docker run -it --rm \
-  -v "$PWD":/workspace \
-  -v "$APP_DIR":/platform \
-  -w /workspace \
+  -v "\$PWD":/workspace \
   "$IMAGE"
 EOF2
 
@@ -58,3 +49,6 @@ echo "landing-platform"
 echo ""
 echo "If command is not found, run:"
 echo 'export PATH="$HOME/.local/bin:$PATH"'
+EOF
+
+chmod +x install.sh

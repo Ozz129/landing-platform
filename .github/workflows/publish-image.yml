@@ -1,3 +1,6 @@
+mkdir -p .github/workflows
+
+cat > .github/workflows/publish-image.yml <<'EOF'
 name: Publish Docker Image
 
 on:
@@ -26,3 +29,4 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/ozz129/landing-platform:latest
+EOF
