@@ -41,77 +41,93 @@ cat > "$BIN_DIR/landing-platform" <<'EOF2'
 #!/bin/bash
 
 APP_DIR="$HOME/.landing-platform"
+WORKSPACE_DIR="$HOME/landing-platform"
 IMAGE="ghcr.io/ozz129/landing-platform:latest"
 
 COMMAND="$1"
-
 shift || true
 
-run_container() {
-cd "$APP_DIR"
+if [ ! -d "$WORKSPACE_DIR" ]; then
+  echo "Workspace not found at: $WORKSPACE_DIR"
+  echo "Creating workspace..."
+  mkdir -p "$WORKSPACE_DIR"
+fi
 
-docker run -it --rm 
--v "$PWD":/workspace 
--v "$APP_DIR":/platform 
--w /workspace 
-"$IMAGE" 
-"$@"
+sync_platform_files() {
+  if [ ! -d "$WORKSPACE_DIR/.claude" ]; then
+    cp -R "$APP_DIR/.claude" "$WORKSPACE_DIR/.claude"
+  fi
+
+  if [ ! -f "$WORKSPACE_DIR/package.json" ] && [ -f "$APP_DIR/package.json" ]; then
+    cp "$APP_DIR/package.json" "$WORKSPACE_DIR/package.json"
+  fi
+
+  if [ ! -f "$WORKSPACE_DIR/package-lock.json" ] && [ -f "$APP_DIR/package-lock.json" ]; then
+    cp "$APP_DIR/package-lock.json" "$WORKSPACE_DIR/package-lock.json"
+  fi
+}
+
+run_container() {
+  sync_platform_files
+
+  docker run -it --rm \
+    -v "$WORKSPACE_DIR":/workspace \
+    -v "$APP_DIR":/platform \
+    -w /workspace \
+    "$IMAGE" \
+    "$@"
 }
 
 case "$COMMAND" in
-shell|"")
-run_container bash
-;;
+  shell|"")
+    run_container bash
+    ;;
 
-claude)
-run_container claude
-;;
+  claude)
+    run_container claude
+    ;;
 
-init)
-PROJECT_NAME="$1"
+  init)
+    PROJECT_NAME="$1"
 
-```
-if [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: landing-platform init <project-name>"
-  exit 1
-fi
+    if [ -z "$PROJECT_NAME" ]; then
+      echo "Usage: landing-platform init <project-name>"
+      exit 1
+    fi
 
-run_container bash -lc "claude"
+    run_container bash -lc "claude"
 
-echo ""
-echo "Inside Claude run:"
-echo "/init-project $PROJECT_NAME"
-;;
-```
+    echo ""
+    echo "Inside Claude run:"
+    echo "/init-project $PROJECT_NAME"
+    ;;
 
-create)
-URL="$1"
-PROJECT_NAME="$2"
+  create)
+    URL="$1"
+    PROJECT_NAME="$2"
 
-```
-if [ -z "$URL" ] || [ -z "$PROJECT_NAME" ]; then
-  echo "Usage: landing-platform create <url> <project-name>"
-  exit 1
-fi
+    if [ -z "$URL" ] || [ -z "$PROJECT_NAME" ]; then
+      echo "Usage: landing-platform create <url> <project-name>"
+      exit 1
+    fi
 
-run_container bash -lc "claude"
+    run_container bash -lc "claude"
 
-echo ""
-echo "Inside Claude run:"
-echo "/create-landing $URL $PROJECT_NAME"
-;;
-```
+    echo ""
+    echo "Inside Claude run:"
+    echo "/create-landing $URL $PROJECT_NAME"
+    ;;
 
-*)
-echo "Unknown command: $COMMAND"
-echo ""
-echo "Available commands:"
-echo "  landing-platform shell"
-echo "  landing-platform claude"
-echo "  landing-platform init <project-name>"
-echo "  landing-platform create <url> <project-name>"
-exit 1
-;;
+  *)
+    echo "Unknown command: $COMMAND"
+    echo ""
+    echo "Available commands:"
+    echo "  landing-platform shell"
+    echo "  landing-platform claude"
+    echo "  landing-platform init <project-name>"
+    echo "  landing-platform create <url> <project-name>"
+    exit 1
+    ;;
 esac
 EOF2
 
