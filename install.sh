@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 APP_DIR="$HOME/.landing-platform"
 BIN_DIR="$HOME/.local/bin"
