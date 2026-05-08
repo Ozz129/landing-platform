@@ -30,14 +30,40 @@ docker pull "$IMAGE"
 
 mkdir -p "$BIN_DIR"
 
-cat > "$BIN_DIR/landing-platform" <<EOF2
+cat > "$BIN_DIR/landing-platform" <<'EOF'
 #!/bin/bash
-cd "$APP_DIR"
+
+APP_DIR="$HOME/.landing-platform"
+HOST_DIR="$PWD"
+IMAGE="ghcr.io/ozz129/landing-platform:latest"
 
 docker run -it --rm \
-  -v "\$PWD":/workspace \
-  "$IMAGE"
-EOF2
+  -v "$HOST_DIR":/workspace \
+  -v "$APP_DIR":/platform \
+  -w /workspace \
+  "$IMAGE" \
+  bash -lc '
+    if [ ! -d "/workspace/.claude" ]; then
+      cp -R /platform/.claude /workspace/.claude
+    fi
+
+    if [ ! -f "/workspace/package.json" ] && [ -f "/platform/package.json" ]; then
+      cp /platform/package.json /workspace/package.json
+      cp /platform/package-lock.json /workspace/package-lock.json 2>/dev/null || true
+    fi
+
+    echo ""
+    echo "Landing Platform ready."
+    echo "Workspace: /workspace"
+    echo ""
+    echo "Common commands:"
+    echo "  claude"
+    echo "  /init-project PRUEBA1"
+    echo "  /create-landing https://stripe.com PRUEBA1"
+    echo ""
+    exec bash
+  '
+EOF
 
 chmod +x "$BIN_DIR/landing-platform"
 
