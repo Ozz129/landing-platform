@@ -1,6 +1,6 @@
 ---
 name: landing-ui-builder
-description: Generate a visually striking, modern, responsive landing page inside an existing React project located under /Users/fabianmartinezhoyos/repos using a structured extraction package, visual reference package, screenshots, docs folder sources, consolidated report, PDF, or topic.
+description: Generate a visually striking, modern, responsive landing page inside an existing React project located under /workspace/projects using a structured extraction package, visual reference package, screenshots, docs folder sources, consolidated report, PDF, or topic.
 argument-hint: "[project-name]"
 disable-model-invocation: true
 allowed-tools: Bash, Read, Write, Edit, MultiEdit, Glob, Grep
@@ -12,7 +12,7 @@ Generate a complete landing page with attractive UI and strong styling inside an
 
 This skill must work only inside projects located in:
 
-`/Users/fabianmartinezhoyos/repos`
+`/workspace/projects`
 
 ## Required input
 
@@ -135,14 +135,14 @@ Apply source precedence in this order:
 
 Use this absolute path as the only valid root for target projects:
 
-`/Users/fabianmartinezhoyos/repos`
+`/workspace/projects`
 
 ## Project targeting rules
 
 Before changing files:
 
 1. Verify the target project exists inside:
-   `/Users/fabianmartinezhoyos/repos/<project-name>`
+   `/workspace/projects/<project-name>`
 2. Inspect the project structure first
 3. Work only inside the target project
 4. Do not modify sibling projects
@@ -153,7 +153,7 @@ Before changing files:
 ## Path safety rules
 
 - Always resolve the target project as:
-  `/Users/fabianmartinezhoyos/repos/<PROJECT_NAME>`
+  `/workspace/projects/<PROJECT_NAME>`
   where `<PROJECT_NAME>` is the exact name passed as the first argument to this skill
 - Never use a relative path like `./<PROJECT_NAME>` or `projects/<PROJECT_NAME>`
 - Never work inside another nested project by mistake
@@ -186,7 +186,7 @@ Before generating the landing, execute these steps **in order**:
 Before generating the landing, inspect the `docs/` directory inside the target project.
 
 1. Use file discovery to list all files inside:
-   `/Users/fabianmartinezhoyos/repos/<project-name>/docs`
+   `/workspace/projects/<project-name>/docs`
 2. Read every relevant source file found in that directory.
 3. Treat the following files as high priority when present — read in this order:
    - `docs/builder-brief.md` ← read first if present; pre-synthesized brief
